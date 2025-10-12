@@ -398,7 +398,7 @@
           </p>
 
           <!-- Task Image -->
-          <figure class="image is-4by3">
+          <figure class="image is-4by1">
             <img src="static/images/task.png" alt="Task definition illustration" loading="lazy">
             <figcaption class="has-text-centered is-size-7 mt-2">Illustration of the extreme amodal detection task.</figcaption>
           </figure>
@@ -430,7 +430,7 @@
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered">
       <div class="column is-four-fifths">
-        <h2 class="title is-3">The <code>EXAFace</code> Dataset</h2>
+        <h2 class="title is-3">The EXAFace Dataset</h2>
         <div class="content has-text-justified">
 
           <p>
@@ -623,29 +623,18 @@
     </p>
 
     <!-- Qualitative result Image -->
-          <figure class="image is-4by3">
-            <img src="static/images/qual.png" alt="qualitative result" loading="lazy">
-            <figcaption class="has-text-centered is-size-7 mt-2">Qualitative results.</figcaption>
-          </figure>
+    <figure class="image is-4by3">
+      <img src="static/images/qual.png" alt="qualitative result" loading="lazy">
+      <figcaption class="has-text-centered is-size-7 mt-2">Qualitative results.</figcaption>
+    </figure>
 
-          <p>
-            The final row shows samples from the ground-truth conditional distributions. 
-            Our model effectively leverages contextual cues—such as nearby people (example 1), objects like a skateboard (example 2), or partial body evidence (example 4)—to infer completely unseen faces. 
-            In example 1, the model correctly extends predictions to the left, where a partial person is visible, but not to the right, demonstrating awareness of scene context and typical human height. 
-            Example 3 further shows generalization beyond annotated ground truth. 
-            Compared to our model, Pix2Gestalt struggles without large visible body parts, while the outpainting pipeline can infer outside faces but yields noisier and less consistent results.
-          </p>
-
-          <ol type="1">
-            <li><strong>Inside:</strong> faces that are entirely within the image.</li>
-            <li><strong>Truncated:</strong> faces that are partially within the image.</li>
-            <li><strong>Outside:</strong> faces that are entirely outside the image:
-              <ol type="a">
-                <li><strong>With direct visual evidence</strong>, such as a visible body in the image.</li>
-                <li><strong>Without direct visual evidence</strong>, where indirect cues like eye gaze and semantic co-occurrences may need to be considered.</li>
-              </ol>
-            </li>
-          </ol>
+    <p>
+      The final row shows samples from the ground-truth conditional distributions. 
+      Our model effectively leverages contextual cues—such as nearby people (example 1), objects like a skateboard (example 2), or partial body evidence (example 4)—to infer completely unseen faces. 
+      In example 1, the model correctly extends predictions to the left, where a partial person is visible, but not to the right, demonstrating awareness of scene context and typical human height. 
+      Example 3 further shows generalization beyond annotated ground truth. 
+      Compared to our model, Pix2Gestalt struggles without large visible body parts, while the outpainting pipeline can infer outside faces but yields noisier and less consistent results.
+    </p>
   </div>
 </section>
 
