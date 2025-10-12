@@ -372,45 +372,178 @@
 </section>
 <!-- End paper abstract -->
 
+<!-- Task Definition Section -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Extreme Amodal Detection</h2>
+        <div class="content has-text-justified">
 
-<!-- Image carousel -->
-<section class="hero is-small">
-  <div class="hero-body">
-    <div class="container">
-      <div id="results-carousel" class="carousel results-carousel">
-       <div class="item">
-        <!-- TODO: Replace with your research result images -->
-        <img src="static/images/carousel1.jpg" alt="First research result visualization" loading="lazy"/>
-        <!-- TODO: Replace with description of this result -->
-        <h2 class="subtitle has-text-centered">
-          First image description.
-        </h2>
+          <p>
+            Given an image \( \mathbf{x} \in \mathbb{R}^{H \times W \times 3} \), extreme amodal detection predicts the location of objects within a centrally-expanded region of size \( KH \times KW \), where \( K \) denotes the expansion factor.
+            To predict objects within this larger region, we consider two output types, commonly associated with the tasks of detection and localization.
+          </p>
+
+          <p>
+            For the <strong>detection task</strong>, a set of \( N \) objects \( o_i = (c_i, b_i) \) are predicted, where \( c_i \) is the object class and \( b_i = (x_i, y_i, w_i, h_i) \) is the bounding box represented by center coordinate, width, and height.
+          </p>
+
+          <p>
+            For the <strong>localization task</strong>, a heatmap \( \mathbf{h} \in [0,1]^{KH \times KW \times C} \) is predicted, where \( C \) is the number of classes. The value at coordinate \( (i, j, c) \), denoted \( \hat{h}^c_{i,j} \), indicates the probability that an object of class \( c \) is located at that pixel.
+          </p>
+
+          <p>
+            As motivated in the introduction, we consider a single class in this paper: <strong>human faces</strong>.
+          </p>
+
+          <!-- Task Image -->
+          <figure class="image is-4by3">
+            <img src="static/images/task.png" alt="Task definition illustration" loading="lazy">
+            <figcaption class="has-text-centered is-size-7 mt-2">Illustration of the extreme amodal detection task.</figcaption>
+          </figure>
+
+          <p>
+            As shown in the figure, the difficulty of detecting extreme amodal faces depends on whether there is direct visual evidence within the image of a face wholly or partially outside the image. We classify faces as follows:
+          </p>
+
+          <ol type="1">
+            <li><strong>Inside:</strong> faces that are entirely within the image.</li>
+            <li><strong>Truncated:</strong> faces that are partially within the image.</li>
+            <li><strong>Outside:</strong> faces that are entirely outside the image:
+              <ol type="a">
+                <li><strong>With direct visual evidence</strong>, such as a visible body in the image.</li>
+                <li><strong>Without direct visual evidence</strong>, where indirect cues like eye gaze and semantic co-occurrences may need to be considered.</li>
+              </ol>
+            </li>
+          </ol>
+
+        </div>
       </div>
-      <div class="item">
-        <!-- Your image here -->
-        <img src="static/images/carousel2.jpg" alt="Second research result visualization" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-          Second image description.
-        </h2>
-      </div>
-      <div class="item">
-        <!-- Your image here -->
-        <img src="static/images/carousel3.jpg" alt="Third research result visualization" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-         Third image description.
-       </h2>
-     </div>
-     <div class="item">
-      <!-- Your image here -->
-      <img src="static/images/carousel4.jpg" alt="Fourth research result visualization" loading="lazy"/>
-      <h2 class="subtitle has-text-centered">
-        Fourth image description.
-      </h2>
     </div>
   </div>
-</div>
-</div>
 </section>
+
+
+<!-- Dataset Section -->
+<section class="section hero is-light">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">The <code>EXAFace</code> Dataset</h2>
+        <div class="content has-text-justified">
+
+          <p>
+            We introduce the <strong>Extreme Amodal Face (EXAFace)</strong> dataset, derived from the MS COCO object detection dataset.
+            First, RetinaFace was used to pseudolabel the many unlabeled faces in COCO, excluding detections with a confidence below 0.9, resulting in <strong>2.4×</strong> more face labels.
+            Then, we applied a randomized cropping strategy while preserving both cropped and uncropped bounding boxes.
+          </p>
+
+          <p>For an image with height \( H \) and width \( W \), the cropping procedure is:</p>
+          <ol>
+            <li>Sample crop height from \([0.3H, 0.6H]\) and aspect ratio from \([0.5, 2.0]\), producing crop size \( H' \times W' \).</li>
+            <li>Sample crop center \( (x, y) \) from \([0.5W', W - 0.5W'] \times [0.5H', H - 0.5H']\).</li>
+            <li>Crop the image based on the sampled center and size.</li>
+            <li>Discard boxes not fully inside the expanded crop area (\( K^2 \times \) crop size).</li>
+            <li>Update each box center \( (x_b, y_b) \rightarrow (x_b - x + 0.5KW', y_b - y + 0.5KH') \).</li>
+          </ol>
+          
+          <p>This process is repeated four times per image to generate diverse examples. Image and box statistics are summarized below.</p>
+
+          <!-- Dataset Table -->
+          <div class="table-container mt-4">
+            <table class="table is-bordered is-striped is-narrow is-hoverable is-size-7">
+              <thead>
+                <tr>
+                  <th>♯ × 10³ (%)</th>
+                  <th>Inside</th>
+                  <th>Truncated</th>
+                  <th>Outside +</th>
+                  <th>Outside −</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Boxes (train)</strong></td>
+                  <td>116 (24%)</td>
+                  <td>74 (15%)</td>
+                  <td>66 (13%)</td>
+                  <td>235 (48%)</td>
+                </tr>
+                <tr>
+                  <td><strong>Boxes (test)</strong></td>
+                  <td>5.0 (24%)</td>
+                  <td>3.0 (14%)</td>
+                  <td>2.0 (12%)</td>
+                  <td>11 (50%)</td>
+                </tr>
+                <tr>
+                  <td><strong>Images (train)</strong></td>
+                  <td>30 (17%)</td>
+                  <td>37 (20%)</td>
+                  <td>32 (17%)</td>
+                  <td>83 (46%)</td>
+                </tr>
+                <tr>
+                  <td><strong>Images (test)</strong></td>
+                  <td>1.0 (16%)</td>
+                  <td>1.5 (20%)</td>
+                  <td>1.0 (17%)</td>
+                  <td>3.5 (47%)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="is-size-7 mt-3">
+            Sample counts (×10³) and percentages (in parentheses) are shown for bounding boxes and images.
+            Categories include: <em>inside</em> faces, <em>truncated</em> faces, <em>outside</em> faces with body evidence (+), and <em>outside</em> faces without body evidence (−).
+            An image is assigned a category based on the hardest face it contains.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+    
+<!-- Image carousel -->
+<!-- <section class="hero is-small"> -->
+  <!-- <div class="hero-body"> -->
+    <!-- <div class="container"> -->
+      <!-- <div id="results-carousel" class="carousel results-carousel"> -->
+       <!-- <div class="item"> -->
+        <!-- TODO: Replace with your research result images -->
+        <!-- <img src="static/images/carousel1.jpg" alt="First research result visualization" loading="lazy"/> -->
+        <!-- TODO: Replace with description of this result -->
+        <!-- <h2 class="subtitle has-text-centered"> -->
+          <!-- First image description. -->
+        <!-- </h2> -->
+      <!-- </div> -->
+      <!-- <div class="item"> -->
+        <!-- Your image here -->
+        <!-- <img src="static/images/carousel2.jpg" alt="Second research result visualization" loading="lazy"/> -->
+        <!-- <h2 class="subtitle has-text-centered"> -->
+          <!-- Second image description. -->
+        <!-- </h2> -->
+      <!-- </div> -->
+      <!-- <div class="item"> -->
+        <!-- Your image here -->
+        <!-- <img src="static/images/carousel3.jpg" alt="Third research result visualization" loading="lazy"/> -->
+        <!-- <h2 class="subtitle has-text-centered"> -->
+         <!-- Third image description. -->
+       <!-- </h2> -->
+     <!-- </div> -->
+     <!-- <div class="item"> -->
+      <!-- Your image here -->
+      <!-- <img src="static/images/carousel4.jpg" alt="Fourth research result visualization" loading="lazy"/> -->
+      <!-- <h2 class="subtitle has-text-centered"> -->
+        <!-- Fourth image description. -->
+      <!-- </h2> -->
+    <!-- </div> -->
+  <!-- </div> -->
+<!-- </div> -->
+<!-- </div> -->
+<!-- </section> -->
 <!-- End image carousel -->
 
 <section class="section">
@@ -481,8 +614,38 @@
       </table>
     </div>
     <p class="is-size-7 has-text-justified mt-4">
-      We report metrics such as average precision (AP), mean absolute error (MAE), mean IoU, average recall (AR), self-entropy (SE), and cross-entropy (CE). Subscripts <i>t</i>, <i>o</i>, <i>o+</i>, and <i>o-</i> represent truncated, outside, outside with evidence, and outside without evidence, respectively. Metrics in shaded columns are most relevant to subset performance.
+      Extreme amodal detection performance on the test set of our MS COCO-based dataset.
+      We report metrics such as average precision (AP), mean absolute error (MAE), mean IoU, average recall (AR), self-entropy (SE), and cross-entropy (CE). Subscripts <i>t</i>, <i>o</i>, <i>o+</i>, and <i>o-</i> represent truncated, outside, outside with evidence, and outside without evidence, respectively. 
+      The data subsets truncated (t), outside (o), outside with evidence (o+), and outside without evidence (o-) are indicated by subscripts.
+      The metrics that are most meaningful for assessing performance on the different data subsets are shaded.
+      Detection metrics like AP are appropriate for evaluation of the truncated faces, since the realization of the conditional distribution (our ``ground-truth'') is very close to the true distribution near the image.
+      However, further from the image, this realization no longer captures all modes of the true distribution, and so AR, CE and SE are more meaningful measures of performance in this regime..
     </p>
+
+    <!-- Qualitative result Image -->
+          <figure class="image is-4by3">
+            <img src="static/images/qual.png" alt="qualitative result" loading="lazy">
+            <figcaption class="has-text-centered is-size-7 mt-2">Qualitative results.</figcaption>
+          </figure>
+
+          <p>
+            The final row shows samples from the ground-truth conditional distributions. 
+            Our model effectively leverages contextual cues—such as nearby people (example 1), objects like a skateboard (example 2), or partial body evidence (example 4)—to infer completely unseen faces. 
+            In example 1, the model correctly extends predictions to the left, where a partial person is visible, but not to the right, demonstrating awareness of scene context and typical human height. 
+            Example 3 further shows generalization beyond annotated ground truth. 
+            Compared to our model, Pix2Gestalt struggles without large visible body parts, while the outpainting pipeline can infer outside faces but yields noisier and less consistent results.
+          </p>
+
+          <ol type="1">
+            <li><strong>Inside:</strong> faces that are entirely within the image.</li>
+            <li><strong>Truncated:</strong> faces that are partially within the image.</li>
+            <li><strong>Outside:</strong> faces that are entirely outside the image:
+              <ol type="a">
+                <li><strong>With direct visual evidence</strong>, such as a visible body in the image.</li>
+                <li><strong>Without direct visual evidence</strong>, where indirect cues like eye gaze and semantic co-occurrences may need to be considered.</li>
+              </ol>
+            </li>
+          </ol>
   </div>
 </section>
 
@@ -490,57 +653,57 @@
 
 
 <!-- Youtube video -->
-<section class="hero is-small is-light">
-  <div class="hero-body">
-    <div class="container">
+<!-- <section class="hero is-small is-light"> -->
+  <!-- <div class="hero-body"> -->
+    <!-- <div class="container"> -->
       <!-- Paper video. -->
-      <h2 class="title is-3">Video Presentation</h2>
-      <div class="columns is-centered has-text-centered">
-        <div class="column is-four-fifths">
+      <!-- <h2 class="title is-3">Video Presentation</h2> -->
+      <!-- <div class="columns is-centered has-text-centered"> -->
+        <!-- <div class="column is-four-fifths"> -->
           
-          <div class="publication-video">
+          <!-- <div class="publication-video"> -->
             <!-- TODO: Replace with your YouTube video ID -->
-            <iframe src="https://www.youtube.com/embed/JkaxUblCGz0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+            <!-- <iframe src="https://www.youtube.com/embed/JkaxUblCGz0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe> -->
+          <!-- </div> -->
+        <!-- </div> -->
+      <!-- </div> -->
+    <!-- </div> -->
+  <!-- </div> -->
+<!-- </section> -->
 <!-- End youtube video -->
 
 
 <!-- Video carousel -->
-<section class="hero is-small">
-  <div class="hero-body">
-    <div class="container">
-      <h2 class="title is-3">Another Carousel</h2>
-      <div id="results-carousel" class="carousel results-carousel">
-        <div class="item item-video1">
+<!-- <section class="hero is-small"> -->
+  <!-- <div class="hero-body"> -->
+    <!-- <div class="container"> -->
+      <!-- <h2 class="title is-3">Another Carousel</h2> -->
+      <!-- <div id="results-carousel" class="carousel results-carousel"> -->
+        <!-- <div class="item item-video1"> -->
           <!-- TODO: Add poster image for better preview -->
-          <video poster="" id="video1" controls muted loop height="100%" preload="metadata">
+          <!-- <video poster="" id="video1" controls muted loop height="100%" preload="metadata"> -->
             <!-- Your video file here -->
-            <source src="static/videos/carousel1.mp4" type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-video2">
+            <!-- <source src="static/videos/carousel1.mp4" type="video/mp4"> -->
+          <!-- </video> -->
+        <!-- </div> -->
+        <!-- <div class="item item-video2"> -->
           <!-- TODO: Add poster image for better preview -->
-          <video poster="" id="video2" controls muted loop height="100%" preload="metadata">
+          <!-- <video poster="" id="video2" controls muted loop height="100%" preload="metadata"> -->
             <!-- Your video file here -->
-            <source src="static/videos/carousel2.mp4" type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-video3">
+            <!-- <source src="static/videos/carousel2.mp4" type="video/mp4"> -->
+          <!-- </video> -->
+        <!-- </div> -->
+        <!-- <div class="item item-video3"> -->
           <!-- TODO: Add poster image for better preview -->
-          <video poster="" id="video3" controls muted loop height="100%" preload="metadata">
+          <!-- <video poster="" id="video3" controls muted loop height="100%" preload="metadata"> -->
             <!-- Your video file here -->
-            <source src="static/videos/carousel3.mp4" type="video/mp4">
-          </video>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+            <!-- <source src="static/videos/carousel3.mp4" type="video/mp4"> -->
+          <!-- </video> -->
+        <!-- </div> -->
+      <!-- </div> -->
+    <!-- </div> -->
+  <!-- </div> -->
+<!-- </section> -->
 <!-- End video carousel -->
 
 
@@ -549,18 +712,18 @@
 
 
 <!-- Paper poster -->
-<section class="hero is-small is-light">
-  <div class="hero-body">
-    <div class="container">
-      <h2 class="title">Poster</h2>
+<!-- <section class="hero is-small is-light"> -->
+  <!-- <div class="hero-body"> -->
+    <!-- <div class="container"> -->
+      <!-- <h2 class="title">Poster</h2> -->
 
       <!-- TODO: Replace with your poster PDF -->
-      <iframe  src="static/pdfs/sample.pdf" width="100%" height="550">
-          </iframe>
+      <!-- <iframe  src="static/pdfs/sample.pdf" width="100%" height="550"> -->
+          <!-- </iframe> -->
         
-      </div>
-    </div>
-  </section>
+      <!-- </div> -->
+    <!-- </div> -->
+  <!-- </section> -->
 <!--End paper poster -->
 
 
