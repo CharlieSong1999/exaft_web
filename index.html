@@ -264,7 +264,7 @@
                     <a href="https://rahulsho.me/" target="_blank">Rahul Shome</a><sup>1</sup>,
                   </span>
                   <span class="author-block">
-                    <a href="https://sites.google.com/view/djcampbell" target="_blank">Dylan Campbell</a><sup>1</sup>,
+                    <a href="https://sites.google.com/view/djcampbell" target="_blank">Dylan Campbell</a><sup>1</sup>
                   </span>
                   </div>
 
@@ -545,96 +545,191 @@
 <!-- </div> -->
 <!-- </section> -->
 <!-- End image carousel -->
+<!-- ===================== Method Section ===================== -->
+<section class="section" id="method">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+
+        <h2 class="title is-3 has-text-centered">Extreme Amodal Face Detector</h2>
+
+        <div class="content has-text-justified">
+          <p>
+            Our detector (Figure&nbsp;<a href="#fig-framework-c2f">1</a>) comprises: 
+            (i) a convolutional feature extractor \( f_{\text{feat}} \), 
+            (ii) a transformer encoder–decoder that transfers information between in-image and out-of-image tokens using rotary positional encodings (ROPE), and 
+            (iii) two detection heads for in-image and out-of-image predictions.
+          </p>
+
+          <p class="mb-3">
+            Given an input image \( \mathbf{x} \), the computation is
+          </p>
+
+          <div class="box p-4 is-shadowless" style="background:#fafafa;">
+            \[
+            \begin{aligned}
+              \mathbf{y}_{\text{in}} &= f_{\text{feat}}(\mathbf{x}) \\
+              \mathbf{z}_{\text{in}} &= f_{\text{enc}}(\mathbf{y}_{\text{in}}, \mathbf{p}_{\text{in}}), \quad \mathbf{p}_{\text{in}}=\phi(\mathcal{C}_{\text{in}}) \\
+              \mathbf{y}_{\text{out}} &= f_{\text{dec}}(\mathbf{z}_{\text{in}}, \mathbf{p}), \quad \mathbf{p}=\phi(\mathcal{C}) \\
+              (o_{\text{in}}, \mathbf{h}_{\text{in}}) &= g_{\text{in}}(\mathbf{y}_{\text{in}}), \\
+              (o_{\text{out}}, \mathbf{h}_{\text{out}}) &= g_{\text{out}}(\mathbf{y}_{\text{out}}).
+            \end{aligned}
+            \]
+          </div>
+
+          <!-- Framework + C2F figure placeholder -->
+          <figure id="fig-framework-c2f" class="image mt-5">
+            <!-- Replace SRC with your uploaded combined figure -->
+            <img src="static/images/Framework_and_sc2f.png" alt="Overall framework and selective coarse-to-fine decoder" loading="lazy">
+            <figcaption class="has-text-centered is-size-7 mt-2">
+              Overview of the detector and the selective coarse-to-fine (C2F) decoder. 
+              The encoder shares context from in-image tokens to the expanded region; the decoder queries and refines candidate regions efficiently.
+            </figcaption>
+          </figure>
+
+          <h3 class="title is-5 mt-6">Selective Coarse-to-Fine (C2F) Decoder</h3>
+          <p>
+            Sharing information from the image to the expanded field-of-view is challenging due to 
+            (a) computational cost—at equal resolution, the extended region contains \( (K^2\!-\!1) \) times more tokens—and 
+            (b) object sparsity—only a small fraction of patches contain faces. 
+            We address this with a selective C2F strategy: query the extended region at coarse resolution, 
+            then refine only high-scoring regions.
+          </p>
+
+          <p>
+            Let \( \mathcal{S} \) denote a sequence of coarse-to-fine scales and \( \mathcal{C}_{\text{out}} \) the out-of-image coordinates. 
+            Coarse positional encodings are formed by average pooling the expanded-grid encodings:
+          </p>
+
+          <div class="box p-4 is-shadowless" style="background:#fafafa;">
+            \[
+            \mathbf{p}^{s_i}_{\text{out}} \;=\; \big\{\, \mathrm{avgpool}(\mathbf{p},\, s_i)(u,v) \;\big|\; (u,v)\in \mathcal{C}_{\text{out}} \,\big\}, \quad s_i \in \mathcal{S}.
+            \]
+          </div>
+
+          <p>
+            Initialization sets \( \mathbf{x}^{s_1}_{\text{out}} \leftarrow \mathbf{p}^{s_1}_{\text{out}} \). 
+            A two-layer decoder block \( f_{\text{decblk}} \) attends from coarse out-of-image queries to in-image keys/values 
+            (with ROPE), followed by a scoring network \( f_{\text{score}} \) that selects the top-\( \mu^{s_i}\% \) tokens to refine at the next scale:
+          </p>
+
+          <div class="box p-4 is-shadowless" style="background:#fafafa;">
+            \[
+            \begin{aligned}
+              \mathbf{y}^{s_i}_{\text{out}} &= f_{\text{decblk}}\!\big(\mathbf{x}^{s_i}_{\text{out}},\, \mathbf{p}^{s_i}_{\text{out}},\, \mathbf{z}_{\text{in}},\, \mathbf{p}_{\text{in}}\big), \\
+              \mathbf{x}^{s_{i+1}}_{\text{out}} &= f_{\text{score}}\!\big(\mathbf{y}^{s_i}_{\text{out}},\, \mu^{s_i}\big).
+            \end{aligned}
+            \]
+          </div>
+
+          <p>
+            Multi-scale outputs are aggregated by summing upsampled features:
+          </p>
+
+          <div class="box p-4 is-shadowless" style="background:#fafafa;">
+            \[
+            \mathbf{y}_{\text{out}} \;=\; \sum_{i=1}^{|\mathcal{S}|} \uparrow\!\big(\mathbf{y}^{s_i}_{\text{out}}\big).
+            \]
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- =================== End Method Section ==================== -->
 
 <section class="section">
   <div class="container is-max-desktop">
-    <h2 class="title is-3">Main Results</h2>
-    <div class="table-container">
-      <table class="table is-bordered is-striped is-fullwidth is-hoverable is-size-7">
-        <thead>
-          <tr>
-            <th>Method</th>
-            <th>\( \text{AP} \uparrow \)</th>
-            <th class="has-background-light">\( \text{AP}_\text{t} \uparrow \)</th>
-            <th>\( \text{AP}_\text{o} \uparrow \)</th>
-            <th>\( \text{AP}_\text{o+} \uparrow \)</th>
-            <th>\( \text{AP}_\text{o-} \uparrow \)</th>
-            <th>\( \text{MAE} \downarrow \)</th>
-            <th class="has-background-light">\( \text{MAE}_\text{t} \downarrow \)</th>
-            <th>\( \text{MAE}_\text{o} \downarrow \)</th>
-            <th>\( \text{MAE}_\text{o+} \downarrow \)</th>
-            <th>\( \text{MAE}_\text{o-} \downarrow \)</th>
-            <th class="has-background-light">\( \text{mIoU}_\text{o} \uparrow \)</th>
-            <th>\( \text{AR}_\text{o} \uparrow \)</th>
-            <th>\( \text{SE}_\text{o} \downarrow \)</th>
-            <th>\( \text{CE}_\text{o} \downarrow \)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Uniform</td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td>
-            <td>--</td><td>--</td><td>--</td><td>--</td><td>--</td>
-            <td>8.80</td><td>51.71</td><td>100</td><td>100</td>
-          </tr>
-          <tr>
-            <td>Oracle-GT</td><td>100</td><td>100</td><td>100</td><td>100</td><td>100</td>
-            <td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td>
-            <td>100</td><td>100</td><td>58.68</td><td>58.68</td>
-          </tr>
-          <tr>
-            <td>Oracle-YOLOH</td><td>44.79</td><td>61.70</td><td>36.34</td><td>49.83</td><td>22.85</td>
-            <td>7.55</td><td>2.07</td><td>10.65</td><td>2.54</td><td>13.60</td>
-            <td>28.63</td><td>44.56</td><td>91.96</td><td>78.74</td>
-          </tr>
-          <tr>
-            <td>YOLOH</td>
-            <td>10.20</td><td>30.60</td><td>0.01</td><td>0.01</td><td>0.001</td>
-            <td><u>17.37</u></td><td>2.78</td><td>26.11</td><td>6.87</td><td><u>33.11</u></td>
-            <td>17.23</td><td>19.01</td><td>96.90</td><td>94.01</td>
-          </tr>
-          <tr>
-            <td>Pix2Gestalt</td>
-            <td><u>11.30</u></td><td><u>33.43</u></td><td>0.24</td><td>0.48</td><td>0.001</td>
-            <td>17.38</td><td>2.83</td><td><u>26.10</u></td><td>6.63</td><td>33.18</td>
-            <td>17.75</td><td>20.25</td><td>96.54</td><td>93.31</td>
-          </tr>
-          <tr>
-            <td>Outpaint</td>
-            <td>4.93</td><td>11.54</td><td><b>1.62</b></td><td><b>2.47</b></td><td><b>0.76</b></td>
-            <td><b>14.69</b></td><td>2.07</td><td><b>21.94</b></td><td><b>3.48</b></td><td><b>28.67</b></td>
-            <td><b>20.53</b></td><td><u>25.03</u></td><td><u>96.41</u></td><td><u>90.18</u></td>
-          </tr>
-          <tr>
-            <td><b>Ours</b></td>
-            <td><b>23.07</b></td><td><b>66.69</b></td><td><u>1.26</u></td><td><u>2.17</u></td><td><u>0.34</u></td>
-            <td>17.83</td><td><b>2.01</b></td><td>27.43</td><td><u>4.53</u></td><td>35.77</td>
-            <td><u>18.70</u></td><td><b>27.17</b></td><td><b>93.99</b></td><td><b>88.16</b></td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="columns is-centered has-text-centered">
+      <h2 class="title is-3">Main Results</h2>
+      <div class="table-container">
+        <table class="table is-bordered is-striped is-fullwidth is-hoverable is-size-7">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>\( \text{AP} \uparrow \)</th>
+              <th class="has-background-light">\( \text{AP}_\text{t} \uparrow \)</th>
+              <th>\( \text{AP}_\text{o} \uparrow \)</th>
+              <th>\( \text{AP}_\text{o+} \uparrow \)</th>
+              <th>\( \text{AP}_\text{o-} \uparrow \)</th>
+              <th>\( \text{MAE} \downarrow \)</th>
+              <th class="has-background-light">\( \text{MAE}_\text{t} \downarrow \)</th>
+              <th>\( \text{MAE}_\text{o} \downarrow \)</th>
+              <th>\( \text{MAE}_\text{o+} \downarrow \)</th>
+              <th>\( \text{MAE}_\text{o-} \downarrow \)</th>
+              <th class="has-background-light">\( \text{mIoU}_\text{o} \uparrow \)</th>
+              <th>\( \text{AR}_\text{o} \uparrow \)</th>
+              <th>\( \text{SE}_\text{o} \downarrow \)</th>
+              <th>\( \text{CE}_\text{o} \downarrow \)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Uniform</td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td>
+              <td>--</td><td>--</td><td>--</td><td>--</td><td>--</td>
+              <td>8.80</td><td>51.71</td><td>100</td><td>100</td>
+            </tr>
+            <tr>
+              <td>Oracle-GT</td><td>100</td><td>100</td><td>100</td><td>100</td><td>100</td>
+              <td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td>
+              <td>100</td><td>100</td><td>58.68</td><td>58.68</td>
+            </tr>
+            <tr>
+              <td>Oracle-YOLOH</td><td>44.79</td><td>61.70</td><td>36.34</td><td>49.83</td><td>22.85</td>
+              <td>7.55</td><td>2.07</td><td>10.65</td><td>2.54</td><td>13.60</td>
+              <td>28.63</td><td>44.56</td><td>91.96</td><td>78.74</td>
+            </tr>
+            <tr>
+              <td>YOLOH</td>
+              <td>10.20</td><td>30.60</td><td>0.01</td><td>0.01</td><td>0.001</td>
+              <td><u>17.37</u></td><td>2.78</td><td>26.11</td><td>6.87</td><td><u>33.11</u></td>
+              <td>17.23</td><td>19.01</td><td>96.90</td><td>94.01</td>
+            </tr>
+            <tr>
+              <td>Pix2Gestalt</td>
+              <td><u>11.30</u></td><td><u>33.43</u></td><td>0.24</td><td>0.48</td><td>0.001</td>
+              <td>17.38</td><td>2.83</td><td><u>26.10</u></td><td>6.63</td><td>33.18</td>
+              <td>17.75</td><td>20.25</td><td>96.54</td><td>93.31</td>
+            </tr>
+            <tr>
+              <td>Outpaint</td>
+              <td>4.93</td><td>11.54</td><td><b>1.62</b></td><td><b>2.47</b></td><td><b>0.76</b></td>
+              <td><b>14.69</b></td><td>2.07</td><td><b>21.94</b></td><td><b>3.48</b></td><td><b>28.67</b></td>
+              <td><b>20.53</b></td><td><u>25.03</u></td><td><u>96.41</u></td><td><u>90.18</u></td>
+            </tr>
+            <tr>
+              <td><b>Ours</b></td>
+              <td><b>23.07</b></td><td><b>66.69</b></td><td><u>1.26</u></td><td><u>2.17</u></td><td><u>0.34</u></td>
+              <td>17.83</td><td><b>2.01</b></td><td>27.43</td><td><u>4.53</u></td><td>35.77</td>
+              <td><u>18.70</u></td><td><b>27.17</b></td><td><b>93.99</b></td><td><b>88.16</b></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="is-size-7 has-text-justified mt-4">
+        Extreme amodal detection performance on the test set of our MS COCO-based dataset.
+        We report metrics such as average precision (AP), mean absolute error (MAE), mean IoU, average recall (AR), self-entropy (SE), and cross-entropy (CE). Subscripts <i>t</i>, <i>o</i>, <i>o+</i>, and <i>o-</i> represent truncated, outside, outside with evidence, and outside without evidence, respectively. 
+        The data subsets truncated (t), outside (o), outside with evidence (o+), and outside without evidence (o-) are indicated by subscripts.
+        The metrics that are most meaningful for assessing performance on the different data subsets are shaded.
+        Detection metrics like AP are appropriate for evaluation of the truncated faces, since the realization of the conditional distribution (our ``ground-truth'') is very close to the true distribution near the image.
+        However, further from the image, this realization no longer captures all modes of the true distribution, and so AR, CE and SE are more meaningful measures of performance in this regime..
+      </p>
+  
+      <!-- Qualitative result Image -->
+      <figure class="image is-4by3">
+        <img src="static/images/qual.png" alt="qualitative result" loading="lazy">
+        <figcaption class="has-text-centered is-size-7 mt-2">Qualitative results.</figcaption>
+      </figure>
+  
+      <p class="is-size-7 has-text-justified mt-4">
+        The final row shows samples from the ground-truth conditional distributions. 
+        Our model effectively leverages contextual cues—such as nearby people (example 1), objects like a skateboard (example 2), or partial body evidence (example 4)—to infer completely unseen faces. 
+        In example 1, the model correctly extends predictions to the left, where a partial person is visible, but not to the right, demonstrating awareness of scene context and typical human height. 
+        Example 3 further shows generalization beyond annotated ground truth. 
+        Compared to our model, Pix2Gestalt struggles without large visible body parts, while the outpainting pipeline can infer outside faces but yields noisier and less consistent results.
+      </p>
     </div>
-    <p class="is-size-7 has-text-justified mt-4">
-      Extreme amodal detection performance on the test set of our MS COCO-based dataset.
-      We report metrics such as average precision (AP), mean absolute error (MAE), mean IoU, average recall (AR), self-entropy (SE), and cross-entropy (CE). Subscripts <i>t</i>, <i>o</i>, <i>o+</i>, and <i>o-</i> represent truncated, outside, outside with evidence, and outside without evidence, respectively. 
-      The data subsets truncated (t), outside (o), outside with evidence (o+), and outside without evidence (o-) are indicated by subscripts.
-      The metrics that are most meaningful for assessing performance on the different data subsets are shaded.
-      Detection metrics like AP are appropriate for evaluation of the truncated faces, since the realization of the conditional distribution (our ``ground-truth'') is very close to the true distribution near the image.
-      However, further from the image, this realization no longer captures all modes of the true distribution, and so AR, CE and SE are more meaningful measures of performance in this regime..
-    </p>
-
-    <!-- Qualitative result Image -->
-    <figure class="image is-4by3">
-      <img src="static/images/qual.png" alt="qualitative result" loading="lazy">
-      <figcaption class="has-text-centered is-size-7 mt-2">Qualitative results.</figcaption>
-    </figure>
-
-    <p>
-      The final row shows samples from the ground-truth conditional distributions. 
-      Our model effectively leverages contextual cues—such as nearby people (example 1), objects like a skateboard (example 2), or partial body evidence (example 4)—to infer completely unseen faces. 
-      In example 1, the model correctly extends predictions to the left, where a partial person is visible, but not to the right, demonstrating awareness of scene context and typical human height. 
-      Example 3 further shows generalization beyond annotated ground truth. 
-      Compared to our model, Pix2Gestalt struggles without large visible body parts, while the outpainting pipeline can infer outside faces but yields noisier and less consistent results.
-    </p>
   </div>
 </section>
 
